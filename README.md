@@ -41,12 +41,13 @@ This project demonstrates practical usage of:
 ---
 
 ## 📂 Project Structure
+```
 news_scraper.py
 README.md
 output/
 sports_news_YYYY-MM-DD.txt
 sports_news_YYYY-MM-DD.csv
-
+```
 ---
 
 ## ▶️ How To Run The Project
@@ -84,16 +85,17 @@ Output files will be saved inside the **output folder**
 ---
 
 ## 📊 Example Output
-
+```
 Example headlines:
 1.IPL 2026 match updates
 2.India squad announcement
 3.Rohit Sharma interview
-
+```
 Saved as:
+```
 output/sports_news_YYYY-MM-DD.txt
 output/sports_news_YYYY-MM-DD.csv
-
+```
 ---
 
 ## 🎯 Learning Outcome
