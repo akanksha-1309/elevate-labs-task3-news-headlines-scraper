@@ -10,21 +10,7 @@ print()
 
 topic = topic.lower()
 
-category_urls = {
-    "sports": "https://timesofindia.indiatimes.com/rssfeeds/4719148.cms",
-    "cricket": "https://timesofindia.indiatimes.com/rssfeeds/54829575.cms",
-    "business": "https://timesofindia.indiatimes.com/rssfeeds/1898055.cms",
-    "technology": "https://timesofindia.indiatimes.com/rssfeeds/66949542.cms",
-    "ai": "https://timesofindia.indiatimes.com/rssfeeds/66949542.cms",
-    "bollywood": "https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms",
-    "politics": "https://timesofindia.indiatimes.com/rssfeeds/296589292.cms"
-}
-
-url = category_urls.get(topic)
-
-if url is None:
-    print("Topic not available. Showing general headlines instead.\n")
-    url = "https://timesofindia.indiatimes.com/rssfeedstopstories.cms"
+url = f"https://news.google.com/rss/search?q={topic}&hl=en-IN&gl=IN&ceid=IN:en"
 
 print(f"Fetching latest '{topic}' news headlines...\n")
 folder_name = "output"
@@ -44,11 +30,11 @@ except requests.exceptions.RequestException as error:
     print("Error accessing website:", error)
     exit()
 
-soup = BeautifulSoup(response.text, "html.parser")
-print("Website Title:", soup.title.text)
+soup = BeautifulSoup(response.text, "xml")
+print("Source: Google News RSS Feed")
 print()
 
-headlines = soup.find_all("title")
+items = soup.find_all("item")
 
 safe_topic = topic.replace(" ", "_")
 
@@ -64,14 +50,16 @@ if os.stat(filename).st_size ==0:
     file.write("Fetched on: " + str(datetime.now()) + "\n\n")
 
 if os.stat(csv_filename).st_size ==0:
-    writer.writerow(["Top News Headlines"])
-    writer.writerow(["Fetched on: ", str(datetime.now())])
-    writer.writerow([])
+    writer.writerow(["No", "Headline", "Link", "Fetched Time"])
 
 unique_headlines = set()
 count = 1
 
-limit = int(input("How many headlines to fetch? "))
+try:
+    limit = int(input("How many headlines to fetch? "))
+except ValueError:
+    print("Please enter a valid number.")
+    exit()
 print()
 
 existing_headlines = set()
@@ -81,20 +69,19 @@ if os.path.exists(filename):
         for line in read_file:
             existing_headlines.add(line.strip().split(". ", 1)[-1])
 
-for headline in headlines[1:limit+1]:
-    text = headline.text.strip()
-
-    if topic not in category_urls:
-        if topic not in text.lower():
-            continue
+for item in items[:limit]:
+    text = item.title.text.strip()
+    link = item.link.text.strip()
+    fetched_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
     if text != "" and text not in unique_headlines:
         print(f"{count}. {text}")
+        print("   Link:", link)
 
         if text not in existing_headlines:
             formatted_headline = f"{count}. {text}"
             file.write(formatted_headline + "\n")
-            writer.writerow([count, text])
+            writer.writerow([count, text, link, fetched_time])
             existing_headlines.add(text)
 
         unique_headlines.add(text)
